@@ -1,73 +1,171 @@
-<!doctype html>
+<?php
+
+session_start();
+
+require 'functions.php';
+
+//cek cookie
+if (isset($_COOKIE['id']) && isset($_COOKIE['key'])) {
+	$id = $_COOKIE['id'];
+	$key = $_COOKIE['key'];
+
+	//ambil username berdasarkan id
+	$result = mysqli_query($conn,"SELECT username FROM user WHERE id = $id");
+	$row = mysqli_fetch_assoc($result);
+
+	//cek cookie dan username
+	if ($key === hash('sha256', $row['username'])) {
+		$_SESSION['login'] = true;
+	}
+
+}
+
+
+if (isset($_SESSION["login"])) {
+	header("Location: index.php");
+	exit;
+}
+
+if (isset($_POST["login"])) {
+	
+	$username = $_POST["username"];
+	$password = $_POST["password"];
+
+	$result = mysqli_query($conn, "SELECT * FROM user WHERE username = '$username'");
+
+	//cek username
+	if (mysqli_num_rows($result) === 1) {
+		
+		//cek password
+		$row = mysqli_fetch_assoc($result);
+		if(password_verify($password, $row["password"])){
+			//set session
+			$_SESSION["login"] = true;
+
+			//Cek remember me
+			if (isset($_POST['remember'])) {
+				
+				//buat cookie
+				
+				setcookie('id', $row['id'], time()+60);
+				setcookie('key',hash('sha256', $row['username']), time()+60);
+			}
+
+			header("Location: index.php");
+			exit;
+		}
+
+	}
+
+	$error = true;
+}
+
+
+?>
+
+
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+<head>
+	<title>Login Database Social Distancing</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->	
+	<link rel="icon" type="image/png" href="images/icons/favicon.ico"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="css/util-login.css">
+	<link rel="stylesheet" type="text/css" href="css/main-login.css">
+<!--===============================================================================================-->
+</head>
+<body>
 
-    <link rel="stylesheet" href="fonts/icomoon/style.css">
+	
+	<div class="limiter">
+		<div class="container-login100">
+			<div class="wrap-login100">
+				<div class="login100-pic js-tilt" data-tilt>
+					<img src="images/img-01.png" alt="IMG">
+				</div>
 
-    <link rel="stylesheet" href="css/owl.carousel.min.css">
+				<form class="login100-form validate-form" action="" method="post">
+					<span class="login100-form-title">
+						User Login
+					</span>
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    
-    <!-- Style -->
-    <link rel="stylesheet" href="css/style.css">
+					<?php if (isset($error)) : ?>
+					<p style="color: red; font-style: italic;">username / password salah!</p>
+					<?php endif; ?>
 
-    <title>Login #3</title>
-  </head>
-  <body>
-  
+					<div class="wrap-input100 validate-input" data-validate = "username is required">
+						<input class="input100" id="username" type="text" name="username" placeholder="Username">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-envelope" aria-hidden="true"></i>
+						</span>
+					</div>
 
-  <div class="half">
-    <div class="bg order-1 order-md-2" style="background-image: url('images/bg_1.jpg');"></div>
-    <div class="contents order-2 order-md-1">
+					<div class="wrap-input100 validate-input" data-validate = "Password is required">
+						<input class="input100" id="password" type="password" name="password" placeholder="Password">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+						</span>
+					</div>
+					
+					<div class="container-login100-form-btn">
+						<button class="login100-form-btn" type="submit" name="login">
+							Login
+						</button>
+					</div>
 
-      <div class="container">
-        <div class="row align-items-center justify-content-center">
-          <div class="col-md-6">
-            <div class="form-block">
-              <div class="text-center mb-5">
-              <h3>Login to <strong>Colorlib</strong></h3>
-              <!-- <p class="mb-4">Lorem ipsum dolor sit amet elit. Sapiente sit aut eos consectetur adipisicing.</p> -->
-              </div>
-              <form action="#" method="post">
-                <div class="form-group first">
-                  <label for="username">Username</label>
-                  <input type="text" class="form-control" placeholder="your-email@gmail.com" id="username">
-                </div>
-                <div class="form-group last mb-3">
-                  <label for="password">Password</label>
-                  <input type="password" class="form-control" placeholder="Your Password" id="password">
-                </div>
-                
-                <div class="d-sm-flex mb-5 align-items-center">
-                  <label class="control control--checkbox mb-3 mb-sm-0"><span class="caption">Remember me</span>
-                    <input type="checkbox" checked="checked"/>
-                    <div class="control__indicator"></div>
-                  </label>
-                  <span class="ml-auto"><a href="#" class="forgot-pass">Forgot Password</a></span> 
-                </div>
+					<div class="text-center p-t-12">
+						<input type="checkbox" name="remember" id="remember">
+						<label for="remember"></label>
+						<span class="txt1">
+							Remember me
+						</span>
+					</div>
 
-                <input type="submit" value="Log In" class="btn btn-block btn-primary">
+					<div class="text-center p-t-136">
+						<a class="txt2" href="registrasi.php">
+							Daftar Akun (Registrasi)
+							<i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
+						</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	
 
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+	
+<!--===============================================================================================-->	
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+	<script src="vendor/bootstrap/js/popper.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+	<script src="vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+	<script src="vendor/tilt/tilt.jquery.min.js"></script>
+	<script >
+		$('.js-tilt').tilt({
+			scale: 1.1
+		})
+	</script>
+<!--===============================================================================================-->
+	<<script src="js/main-login.js"></script>
 
-    
-  </div>
-    
-    
-
-    <script src="js/jquery-3.3.1.min.js"></script>
-    <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/main.js"></script>
-  </body>
+</body>
 </html>
