@@ -27,7 +27,7 @@ if (isset($_POST["register"])) {
 </head>
 <body class="form-v9">
 	<div class="page-content" style="background: -webkit-linear-gradient(45deg, #4158d0, #c850c0);">
-		<div class="form-v9-content" style="background-image: url('images/kamerayya3.jpg')">
+		<div class="form-v9-content" style="border-style: solid; background-image: url('images/kamerayya3_2.jpg')">
 			<form class="form-detail" action="" method="post">
 				<h2>Form Registrasi</h2>
 				<div class="form-row-total-username">

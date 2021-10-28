@@ -74,6 +74,7 @@ if (isset($_POST["cari"])){
 								<th style="text-align: center;">No.</th>
 								<th style="text-align: center;">Aksi</th>
 								<th style="text-align: center;">Gambar</th>
+								<th style="text-align: center;">Jumlah Pelanggar</th>
 								<th style="text-align: center;">Waktu</th>
 							</tr>
 <?php $i=1; ?>
@@ -84,6 +85,7 @@ if (isset($_POST["cari"])){
 									<td style="text-align: center;"><b><?= $i; ?></b></td>
 									<td width="50"><a href="<?php echo 'social-distancing-detector/'.$row["gambar"]; ?>" class="thumbs" onclick="return false">preview</a><br><br><a href="hapus.php?id=<?= $row["id"] ?>" onclick="return confirm('yakin?')">hapus</a></td>
 									<td width="500" height="300"><img src="<?php echo 'social-distancing-detector/'.$row["gambar"]; ?>" width="100%"></td>
+									<td style="text-align: center;"><?php echo $row["pelanggar"] ?> Pelanggar</td>
 									<td style="text-align: center;"><?php echo $row["waktu"]; ?></td>
 								</tr>
 <?php $i++; ?>
